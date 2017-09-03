@@ -11,7 +11,7 @@ For now, it can deal with three datasets:
 
 The three datasets have rgb and depth images as well as camera pose information. In addition, to convert depth images into point cloud, we have know intrinsic parameters.
 
-### 2. Unified format
+### 2. Unified Format
 No matter which type of dataset comes, the output format is the same.
 Directory structures are reorganized as follows.
 ![tree-compare](https://github.com/goodgodgd/RgbdFormatter/blob/master/imgs/tree-compare.png)
@@ -25,7 +25,7 @@ The output structure has four level hierarchies.
 			- depth-#.png
 		- poses.txt, camera_param.txt
 
-### 3. How to use
+### 3. How To Use
 The main function of this repository is **rgbdFormatter.m**. The simple usage of it can be seen by typing 'help rgbdFormatter' on command window or just see **convertAll.m**.
 The definition of **rgbdFormatter.m** is as follows.
 > rgbdFormatter(dataStyle, sourcePath, targetPath, sceneDirPattern) </br>
@@ -38,7 +38,7 @@ The definition of **rgbdFormatter.m** is as follows.
 > %   Folder names of scenes must have specific pattern with respect to dataStyle. </br>
 > %   e.g - 'scene_\*', 'rgbd_dataset_\*' </br>
 
-### 4. How to adopt new dataset
+### 4. How To Adopt a New Dataset
 Since RgbdFormatter was implemented with MATLAB classes, one can easily adopt new datasets with a minimal effort. 
 All you have to do is to make a new class that inherits **Reformatter** and implement four abstract methods. Here's an example of **ReformatRgbdScenes**.
 
