@@ -36,7 +36,7 @@ The definition of **rgbdFormatter.m** is as follows.
 > % targetPath: target path for converted data in predefined format </br>
 > % sceneDirPattern: Naming pattern of scene folders. </br>
 > %   Folder names of scenes must have specific pattern with respect to dataStyle. </br>
-> %   e.g - 'scene_*', 'rgbd_dataset_*' </br>
+> %   e.g - 'scene_\*', 'rgbd_dataset_\*' </br>
 
 
 ### 4. How to adopt new dataset
