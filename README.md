@@ -38,7 +38,33 @@ The definition of **rgbdFormatter.m** is as follows.
 > %   Folder names of scenes must have specific pattern with respect to dataStyle. </br>
 > %   e.g - 'scene_\*', 'rgbd_dataset_\*' </br>
 
-
 ### 4. How to adopt new dataset
 Since RgbdFormatter was implemented with MATLAB classes, one can easily adopt new datasets with a minimal effort. 
+All you have to do is to make a new class that inherits **Reformatter** and implement four abstract methods. Here's an example of **ReformatRgbdScenes**.
+
+> classdef ReformatRgbdScenes < Reformatter
+> methods
+>     **function** cameraFile = getCameraFileName(obj, rawScenePath) </br>
+>         cameraFile = 'rgbd_scenes_camera.txt'; </br>
+>     end </br>
+>     **function** imgList = getRgbList(obj, srcPath) </br>
+>         imgList = dir(fullfile(srcPath, '*-color.png')); </br>
+>     end </br>
+>     **function** imgList = getDepthList(obj, srcPath) </br>
+>         imgList = dir(fullfile(srcPath, '*-depth.png')); </br>
+>     end </br>
+>     **function** poses = readAllPoses(obj, srcPath) </br>
+>         [pathstr, sceneDir, ~] = fileparts(srcPath); </br>
+>         [pathstr, ~, ~] = fileparts(pathstr); </br>
+>         filename = fullfile(pathstr, 'pc', sprintf('%s.pose', strrep(sceneDir, 'scene_', ''))); </br>
+>         poses = load(filename); </br>
+>     end </br>
+> end % method </br>
+> end </br>
+
+*getCameraFileName()* returns file name that that contains intrinsic paramters of rgb and depth images. This file is copied to each target scene folder. So it has to be prepared in advance in **RgbdFormatter/cameraParams**.
+*getRgbList()* and *getDepthList()* return a list of image files.
+*readAllPoses()* returns poses on rows in [x y z qx qy qz qw] format.
+
+Once you implemented a new class, you can add it in **rgbdFormatter.m** with a new style name.
 

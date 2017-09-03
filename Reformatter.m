@@ -45,7 +45,7 @@ methods
         % fullpath of dir of current m-file
         [pathstr, ~, ~] = fileparts(mfilename('fullpath'));
         % cd ..
-        [pathstr, ~, ~] = fileparts(pathstr);
+        % [pathstr, ~, ~] = fileparts(pathstr);
         try
             srcCameraParam = fullfile(pathstr, 'cameraParams', obj.getCameraFileName(rawScenePath))
             dstCameraParam = fullfile(dstPath, 'camera_param.txt');
