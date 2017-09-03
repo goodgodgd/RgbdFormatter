@@ -62,9 +62,9 @@ All you have to do is to make a new class that inherits **Reformatter** and impl
 > end % method </br>
 > end </br>
 
-*getCameraFileName()* returns file name that that contains intrinsic paramters of rgb and depth images. This file is copied to each target scene folder. So it has to be prepared in advance in **RgbdFormatter/cameraParams**. </br>
-*getRgbList()* and *getDepthList()* return a list of image files. </br>
-*readAllPoses()* returns poses on rows in [x y z qx qy qz qw] format. </br>
+- *getCameraFileName()* returns file name that that contains intrinsic paramters of rgb and depth images. This file is copied to each target scene folder. So it has to be prepared in advance in **RgbdFormatter/cameraParams**. </br>
+- *getRgbList()* and *getDepthList()* return a list of image files. </br>
+- *readAllPoses()* returns poses on rows in [x y z qx qy qz qw] format. </br>
 
 Once you implemented a new class, you can add it in **rgbdFormatter.m** with a new style name.
 
