@@ -1,0 +1,17 @@
+rgb_height = 968
+rgb_width = 1296
+rgb_fx = 1170.187988
+rgb_fy = 1170.187988
+rgb_cx = 647.750000
+rgb_cy = 483.750000
+
+depth_height = 480
+depth_width = 640
+depth_fx = 571.623718
+depth_fy = 571.623718
+depth_cx = 319.500000
+depth_cy = 239.500000
+
+rgbToDepthExtrinsic = -0.0379 -0.0034 -0.0219 1.0000 0.0042 0.0014 -0.0034
+scaleFactor = 1000
+

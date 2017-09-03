@@ -1,0 +1,15 @@
+rgb_width = 640
+rgb_height = 480
+rgb_fx = 520.9
+rgb_fy = 521.0
+rgb_cx = 325.1
+rgb_cy = 249.7
+
+# depth images are already preregisted to rgb images.
+depth_width = 640
+depth_height = 480
+depth_fx = 520.9
+depth_fy = 521.0
+depth_cx = 325.1
+depth_cy = 249.7
+
