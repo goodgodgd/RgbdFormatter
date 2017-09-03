@@ -48,10 +48,10 @@ All you have to do is to make a new class that inherits **Reformatter** and impl
 >         &nbsp;&nbsp;cameraFile = 'rgbd_scenes_camera.txt'; </br>
 >     end </br>
 >     **function** imgList = getRgbList(obj, srcPath) </br>
->         &nbsp;&nbsp;imgList = dir(fullfile(srcPath, '*-color.png')); </br>
+>         &nbsp;&nbsp;imgList = dir(fullfile(srcPath, '\*-color.png')); </br>
 >     end </br>
 >     **function** imgList = getDepthList(obj, srcPath) </br>
->         &nbsp;&nbsp;imgList = dir(fullfile(srcPath, '*-depth.png')); </br>
+>         &nbsp;&nbsp;imgList = dir(fullfile(srcPath, '\*-depth.png')); </br>
 >     end </br>
 >     **function** poses = readAllPoses(obj, srcPath) </br>
 >         &nbsp;&nbsp;[pathstr, sceneDir, ~] = fileparts(srcPath); </br>
