@@ -42,22 +42,22 @@ The definition of **rgbdFormatter.m** is as follows.
 Since RgbdFormatter was implemented with MATLAB classes, one can easily adopt new datasets with a minimal effort. 
 All you have to do is to make a new class that inherits **Reformatter** and implement four abstract methods. Here's an example of **ReformatRgbdScenes**.
 
-> classdef ReformatRgbdScenes < Reformatter
-> methods
+> classdef ReformatRgbdScenes < Reformatter </br>
+> methods </br>
 >     **function** cameraFile = getCameraFileName(obj, rawScenePath) </br>
->         cameraFile = 'rgbd_scenes_camera.txt'; </br>
+>         &nbsp;&nbsp;cameraFile = 'rgbd_scenes_camera.txt'; </br>
 >     end </br>
 >     **function** imgList = getRgbList(obj, srcPath) </br>
->         imgList = dir(fullfile(srcPath, '*-color.png')); </br>
+>         &nbsp;&nbsp;imgList = dir(fullfile(srcPath, '*-color.png')); </br>
 >     end </br>
 >     **function** imgList = getDepthList(obj, srcPath) </br>
->         imgList = dir(fullfile(srcPath, '*-depth.png')); </br>
+>         &nbsp;&nbsp;imgList = dir(fullfile(srcPath, '*-depth.png')); </br>
 >     end </br>
 >     **function** poses = readAllPoses(obj, srcPath) </br>
->         [pathstr, sceneDir, ~] = fileparts(srcPath); </br>
->         [pathstr, ~, ~] = fileparts(pathstr); </br>
->         filename = fullfile(pathstr, 'pc', sprintf('%s.pose', strrep(sceneDir, 'scene_', ''))); </br>
->         poses = load(filename); </br>
+>         &nbsp;&nbsp;[pathstr, sceneDir, ~] = fileparts(srcPath); </br>
+>         &nbsp;&nbsp;[pathstr, ~, ~] = fileparts(pathstr); </br>
+>         &nbsp;&nbsp;filename = fullfile(pathstr, 'pc', sprintf('%s.pose', strrep(sceneDir, 'scene_', ''))); </br>
+>         &nbsp;&nbsp;poses = load(filename); </br>
 >     end </br>
 > end % method </br>
 > end </br>
