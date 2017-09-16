@@ -65,18 +65,6 @@ classdef ReformatUnregistered < Reformatter
             itgintr.cy = rgbintr.cy * yscale;
         end
 
-        function writeCameraParams(obj, intrinsic, dstFileName)
-            fid = fopen(dstFileName, 'w');
-            fprintf(fid, 'width = %d\n', intrinsic.width);
-            fprintf(fid, 'height = %d\n', intrinsic.height);
-            fprintf(fid, 'fx = %d\n', intrinsic.fx);
-            fprintf(fid, 'fy = %d\n', intrinsic.fy);
-            fprintf(fid, 'cx = %d\n', intrinsic.cx);
-            fprintf(fid, 'cy = %d\n', intrinsic.cy);
-            fprintf(fid, 'depthMeterScale = %d\n', obj.depthMeterScale);
-            fclose(fid);
-        end
-
         function registered = checkIntrinsics(obj)
             rgb = obj.rgbintr;
             dep = obj.depintr;
@@ -93,11 +81,23 @@ classdef ReformatUnregistered < Reformatter
             registered = abs(params(2,:) - params(3,:)) < 0.01;
         end
 
+        function writeCameraParams(obj, intrinsic, dstFileName)
+            fid = fopen(dstFileName, 'w');
+            fprintf(fid, 'width = %d\n', uint16(intrinsic.width));
+            fprintf(fid, 'height = %d\n', uint16(intrinsic.height));
+            fprintf(fid, 'fx = %.4f\n', intrinsic.fx);
+            fprintf(fid, 'fy = %.4f\n', intrinsic.fy);
+            fprintf(fid, 'cx = %.4f\n', intrinsic.cx);
+            fprintf(fid, 'cy = %.4f\n', intrinsic.cy);
+            fprintf(fid, 'depthMeterScale = %d\n', uint16(obj.depthMeterScale));
+            fclose(fid);
+        end
+
         
         % override method implemented in super class
         function moveImgFile(obj, imgType, srcfile, dstfile)
             if obj.preregistered
-                moveImgFile@Reformatter(obj. imgType, srcfile, dstfile);
+                moveImgFile@Reformatter(obj, imgType, srcfile, dstfile);
                 return
             end
             

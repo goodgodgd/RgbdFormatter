@@ -3,10 +3,9 @@ classdef ReformatTum < Reformatter
     %   Detailed explanation goes here
     
     properties
-        depthTimes
     end
 
-    methods
+    methods (Access = protected)
         function cameraFile = getCameraFileName(obj, rawScenePath)
             if contains(rawScenePath, 'freiburg1', 'IgnoreCase', true)
                 cameraFile = 'tum_freiburg1_camera.txt';
@@ -21,35 +20,40 @@ classdef ReformatTum < Reformatter
             end
         end
 
+        function [depthFiles, rgbFiles, poses] = getSyncronizedFrames(obj, scenePath)
+            [depthFiles, depthTimes] = obj.getImageList(scenePath, 'depth');
+            [rgbFiles, rgbTimes] = obj.getImageList(scenePath, 'rgb');
+            [poses, poseTimes] = obj.readPoses(scenePath, length(depthTimes));
+            
+            maxTimeDiff = 0.015;
+            rgbInds = obj.findCorrespIndices(depthTimes, rgbTimes, maxTimeDiff);
+            poseInds = obj.findCorrespIndices(depthTimes, poseTimes, maxTimeDiff);
+            assert(length(depthTimes)==length(rgbInds) && length(depthTimes)==length(poseInds), ...
+                'ReformatTum:getSyncronizedFrames:wrongIndices', ...
+                'indices length must match depth length')
 
-        function imgList = getDepthList(obj, srcPath)
-            imgList = dir(fullfile(srcPath, 'depth', '*.png'));
-            obj.depthTimes = obj.fileNamesToTimeVector(imgList);
-            [obj.depthTimes, sortedInds] = sort(obj.depthTimes);
-            imgList = imgList(sortedInds);
+            validInds = find(rgbInds>0 & poseInds>0);
+            sprintf('final valid frames: %d among %d', length(validInds), length(depthFiles))
+            depthFiles = depthFiles(validInds);
+            rgbFiles = rgbFiles(rgbInds(validInds));
+            poses = poses(poseInds(validInds),:);
         end
 
-
-        function imgList = getRgbList(obj, srcPath)
-            imgList = dir(fullfile(srcPath, 'rgb', '*.png'));
-            rgbTimes = obj.fileNamesToTimeVector(imgList);
-            [rgbTimes, sortedInds] = sort(rgbTimes);
+        function [imgList, imgTimes] = getImageList(obj, srcPath, imgType)
+            imgList = dir(fullfile(srcPath, imgType, '*.png'));
+            imgTimes = obj.fileNamesToTimeVector(imgList);
+            [imgTimes, sortedInds] = sort(imgTimes);
             imgList = imgList(sortedInds);
-
-            corresIndices = obj.findCorrespIndices(obj.depthTimes, rgbTimes);
-
-            emptyIndex = length(imgList) + 1;
-            imgList(emptyIndex) = imgList(1);
-            imgList(emptyIndex).name = 'noname';
-            imgList = imgList(corresIndices);
-            assert(length(obj.depthTimes)==length(imgList))
-
-            emptyIndices = find(strcmp({imgList.name}, 'noname'));
-            for ind = emptyIndices
-                imgList(ind).name = sprintf('image_%d', ind);
-            end
+            % structure array to cell array of full paths
+            imgList = arrayfun(@(x) fullfile(x.folder, x.name), imgList, 'UniformOutput', false);
         end
-
+        
+        function [poses, poseTimes] = readPoses(obj, srcPath, depthLen)
+            poseFile = fullfile(srcPath, 'groundtruth.txt');
+            poses = obj.readPoseFile(poseFile, depthLen);
+            poseTimes = poses(:,1);
+            poses = poses(:,2:end);
+        end
 
         function times = fileNamesToTimeVector(obj, imgList)
             fileList = {imgList.name};
@@ -58,41 +62,20 @@ classdef ReformatTum < Reformatter
             times = cell2mat(times)';
         end
 
-
-        function indices = findCorrespIndices(obj, referTimes, inputTimes)
-            % set default index as length+1, see why in getRgbList()
-            indices = ones(length(referTimes), 1) * (length(inputTimes) + 1);
-            % find index with closest time in inputTimes
-            for i = 1:length(referTimes)
-                timeDiff = abs(inputTimes - referTimes(i));
-                [time, index] = min(timeDiff);
-                if time < 0.015
-                    indices(i) = index;
-                end
-            end
+        function indices = findCorrespIndices(obj, referTimes, inputTimes, maxTimeDiff)
+            refTimeMat = repmat(referTimes, 1, length(inputTimes));
+            inpTimeMat = repmat(inputTimes', length(referTimes), 1);
+            timeDiff = abs(refTimeMat - inpTimeMat);
+            [minTime, indices] = min(timeDiff, [], 2);
+            indices(minTime > maxTimeDiff) = 0;
         end
 
-
-        function poses = readAllPoses(obj, srcPath)
-            poseFile = fullfile(srcPath, 'groundtruth.txt');
-            poses = obj.readPoseFile(poseFile);
-            poseTimes = poses(:,1);
-            poses = poses(:,2:end);
-
-            corresIndices = obj.findCorrespIndices(obj.depthTimes, poseTimes);
-
-            poses = [poses; zeros(1,7)];
-            poses = poses(corresIndices,:);
-            assert(length(obj.depthTimes)==length(poses))
-        end
-
-
-        function poses = readPoseFile(obj, poseFile)
+        function poses = readPoseFile(obj, poseFile, depthLen)
             fid = fopen(poseFile);
-            assert(abs(fid+1) < 1e-5, ...
-                'ReformatTum:readPoseFile:cannotReadPoseFile', 'pose file open failed')
+            assert(fid >= 0, 'ReformatTum:readPoseFile:cannotReadPoseFile', ...
+                    poseFile)
             tline = fgetl(fid);
-            poses = zeros(length(obj.depthTimes)*5, 8);
+            poses = zeros(depthLen*5, 8);
             maxLen = length(poses);
             linecnt = 0;
 

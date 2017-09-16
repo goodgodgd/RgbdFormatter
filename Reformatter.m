@@ -23,10 +23,10 @@ classdef Reformatter < handle
                 obj.copyCameraParam(rawScenePath, dstPath)
                 % convert rgb, depth, and pose into unified format
                 % and copy them into dstPath
-%                 [depthFiles, rgbFiles, poses] = getSyncronizedFrames();
-                obj.convertAndMoveDepths(rawScenePath, dstPath)
-                obj.convertAndMovePoses(rawScenePath, dstPath)
-                obj.convertAndMoveRgbs(rawScenePath, dstPath)
+                [depthFiles, rgbFiles, poses] = obj.getSyncronizedFrames(rawScenePath);
+                obj.moveImages(depthFiles, 'depth', dstPath)
+                obj.moveImages(rgbFiles, 'rgb', dstPath)
+                obj.writePoses(poses, dstPath)
             end
         end
     end
@@ -71,25 +71,7 @@ classdef Reformatter < handle
             fclose(fid);
         end
 
-
-        function convertAndMoveDepths(obj, srcPath, dstPath)
-            listFunc = @(x) obj.getDepthList(x);
-            obj.convertAndMoveImgs(srcPath, dstPath, 'depth', listFunc);
-        end
-
-
-        function convertAndMoveRgbs(obj, srcPath, dstPath)
-            listFunc = @(x) obj.getRgbList(x);
-            obj.convertAndMoveImgs(srcPath, dstPath, 'rgb', listFunc);
-        end
-
-
-        function convertAndMoveImgs(obj, srcPath, dstPath, imgType, listFunc)
-            imgList = listFunc(srcPath);
-
-            % full path file name
-            imgList = arrayfun(@(x) fullfile(x.folder, x.name), imgList, 'UniformOutput', false);
-            imgList = string(imgList);
+        function moveImages(obj, imgList, imgType, dstPath)
             listLen = length(imgList);
             prinInterv = max(floor(listLen/10), 100);
             prinInterv = round(prinInterv/100)*100;
@@ -109,10 +91,11 @@ classdef Reformatter < handle
         end
 
 
-        function convertAndMovePoses(obj, srcPath, dstPath)
+        function writePoses(obj, poses, dstPath)
             try
-                poses = obj.readAllPoses(srcPath);
-                fid = fopen(fullfile(dstPath, 'poses.txt'), 'w');
+                filename = fullfile(dstPath, 'poses.txt');
+                fid = fopen(filename, 'w');
+                assert(fid>=0, 'Reformatter:writePoses:cannotOpenFile', filename);
                 fprintf(fid, '%.4f %.4f %.4f %.4f %.4f %.4f %.4f\n', poses');
                 fclose(fid);
             catch ME
@@ -122,7 +105,9 @@ classdef Reformatter < handle
 
 
         function pose = convertTransformMatToVector(obj, tmat)
-            assert(size(tmat,1)==4 && size(tmat,2)==4)
+            assert(size(tmat,1)==4 && size(tmat,2)==4 && abs(det(tmat(1:3,1:3))-1) < 0.001, ...
+                'Reformatter:convertTransformMatToVector:wrongTMatFormat', ...
+                'invalid transformation matrix')
             quat = rotm2quat(tmat(1:3,1:3));
             assert(abs(norm(quat,2)-1) < 1e-5)
             posi = tmat(1:3,4)';
@@ -167,18 +152,15 @@ classdef Reformatter < handle
                 end
             end
         end
-        
-        function getSyncronizedFrames()
-            
-        end
     end
 
 
     % methods to be implemented in subclasses
     methods (Abstract, Access = protected)
         cameraFile = getCameraFileName(obj, rawScenePath)
-        imgList = getDepthList(obj, srcPath)
-        imgList = getRgbList(obj, srcPath)
-        poses = readAllPoses(obj, srcPath)
+        [depthFiles, rgbFiles, poses] = getSyncronizedFrames(obj, scenePath)
+%         imgList = getDepthList(obj, srcPath)
+%         imgList = getRgbList(obj, srcPath)
+%         poses = readAllPoses(obj, srcPath)
     end
 end

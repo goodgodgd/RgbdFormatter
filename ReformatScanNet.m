@@ -7,35 +7,46 @@ classdef ReformatScanNet < ReformatUnregistered
 
     % inherited from Reformatter
     methods (Access = protected)
-        function imgList = getRgbList(obj, srcPath)
-            imgList = dir(fullfile(srcPath, 'frame*.color.jpg'));
-        end
-
-        function imgList = getDepthList(obj, srcPath)
-            imgList = dir(fullfile(srcPath, 'frame*.depth.pgm'));
-        end
-
-        function poses = readAllPoses(obj, srcPath)
-            poseList = dir(fullfile(srcPath, 'frame*.pose.txt'));
-            poseList = arrayfun(@(x) fullfile(x.folder, x.name), poseList, 'UniformOutput', false);
-            listLen = length(poseList);
-            poses = zeros(listLen, 7);
-            for i=1:listLen
-                posefile = char(poseList(i));
-                if mod(i,floor(listLen/10))==0
-                    sprintf('reading pose... %d in %d, %s', i, listLen, posefile)
-                end
-
+        function [depthFiles, rgbFiles, poses] = getSyncronizedFrames(obj, scenePath)
+            depthList = dir(fullfile(scenePath, 'frame*.depth.pgm'));
+            numFrames = length(depthList);
+            depthFiles = cell(numFrames, 1);
+            rgbFiles = cell(numFrames, 1);
+            poses = zeros(numFrames, 7);
+            
+            for i=1:numFrames
                 try
-                    tmat = load(posefile);
-                    assert(sum(sum(isinf(tmat))) == 0, ...
-                        'ReformatScanNet:readAllPoses:InfinitePoseValues', ...
-                        sprintf('%s', posefile))
-                    poses(i,:) = obj.convertTransformMatToVector(tmat);
+                    [depth, rgb, pose] = obj.checkExistingFrame(scenePath, i);
+                    depthFiles(i) = {depth};
+                    rgbFiles(i) = {rgb};
+                    poses(i,:) = pose;
                 catch ME
-                    sprintf('ReformatScanNet:readAllPoses:\n%s\n%s', ME.identifier, ME.message)
+%                     sprintf('ReformatScanNet:getSyncronizedFrames:\n%s\n%s', ...
+%                         ME.identifier, ME.message)
                 end
             end
+            
+            validInds = find(~cellfun('isempty', depthFiles) & ...
+                            ~cellfun('isempty', rgbFiles) & sum(abs(poses),2) > 0.1);
+            sprintf('final valid frames: %d among %d', length(validInds), length(depthFiles))
+            depthFiles = depthFiles(validInds);
+            rgbFiles = rgbFiles(validInds);
+            poses = poses(validInds,:);
+        end
+        
+        function [depth, rgb, pose] = checkExistingFrame(obj, scenePath, index)
+            zbIndex = index - 1; % zero-base index
+            depth = fullfile(scenePath, sprintf('frame-%06d.depth.pgm', zbIndex));
+            assert(exist(depth, 'file')>0, ...
+                    'ReformatScanNet:checkExistingFrame:depthNotExist', depth)
+            rgb = fullfile(scenePath, sprintf('frame-%06d.color.jpg', zbIndex));
+            assert(exist(depth, 'file')>0, ...
+                    'ReformatScanNet:checkExistingFrame:rgbNotExist', rgb)
+            posefile = fullfile(scenePath, sprintf('frame-%06d.pose.txt', zbIndex));
+            assert(exist(posefile, 'file')>0, ...
+                    'ReformatScanNet:checkExistingFrame:rgbNotExist', posefile)
+            tmat = load(posefile);
+            pose = obj.convertTransformMatToVector(tmat);
         end
     end
     
