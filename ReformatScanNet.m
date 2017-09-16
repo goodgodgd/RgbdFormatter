@@ -30,7 +30,7 @@ classdef ReformatScanNet < ReformatUnregistered
                     tmat = load(posefile);
                     assert(sum(sum(isinf(tmat))) == 0, ...
                         'ReformatScanNet:readAllPoses:InfinitePoseValues', ...
-                        'pose value is infinite')
+                        sprintf('%s', posefile))
                     poses(i,:) = obj.convertTransformMatToVector(tmat);
                 catch ME
                     sprintf('ReformatScanNet:readAllPoses:\n%s\n%s', ME.identifier, ME.message)

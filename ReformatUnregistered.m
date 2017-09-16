@@ -7,8 +7,9 @@ classdef ReformatUnregistered < Reformatter
         rgbintr
         depintr
         itgintr
-        T_dep2rgb = eye(4);
+        T_dep2rgb = eye(4)
         depthMeterScale = 1000
+        preregistered = false
     end
     
     % constructor
@@ -19,6 +20,7 @@ classdef ReformatUnregistered < Reformatter
             obj.itgintr = obj.invalidIntrinsic();
             obj.T_dep2rgb = eye(4);
             obj.depthMeterScale = 1000;
+            obj.preregistered = false;
         end
     end
 
@@ -42,7 +44,7 @@ classdef ReformatUnregistered < Reformatter
                 obj.readCameraParams(rawScenePath, obj.rgbintr, obj.depintr);
             % merge them into integrated camera parameter
             obj.itgintr = obj.makeUnifiedParams(obj.rgbintr, obj.depintr);
-            obj.checkIntrinsics()
+            obj.preregistered = obj.checkIntrinsics();
             
             % write on file
             dstFileName = fullfile(dstPath, 'camera_param.txt');
@@ -75,7 +77,7 @@ classdef ReformatUnregistered < Reformatter
             fclose(fid);
         end
 
-        function checkIntrinsics(obj)
+        function registered = checkIntrinsics(obj)
             rgb = obj.rgbintr;
             dep = obj.depintr;
             itg = obj.itgintr;
@@ -88,11 +90,17 @@ classdef ReformatUnregistered < Reformatter
             assert(sum(sum(params <= 0))==0, ...
                 'ReformatUnregistered:checkIntrinsics:InvalidIntrinsic', ...
                 'intrinsic parameters were not updated')
+            registered = abs(params(2,:) - params(3,:)) < 0.01;
         end
 
         
         % override method implemented in super class
         function moveImgFile(obj, imgType, srcfile, dstfile)
+            if obj.preregistered
+                moveImgFile@Reformatter(obj. imgType, srcfile, dstfile);
+                return
+            end
+            
             try
                 % read source image
                 image = imread(srcfile);
@@ -153,47 +161,6 @@ classdef ReformatUnregistered < Reformatter
             imgInds = round(imx(valPtInds)) * intrin.height + round(imy(valPtInds)) + 1;
             depthReg = zeros(intrin.height, intrin.width);
             depthReg(imgInds) = points(valPtInds,3);
-            return;
-            
-
-            weight = zeros(intrin.height, intrin.width);
-            depthW = zeros(intrin.height, intrin.width);
-            depthReg = zeros(intrin.height, intrin.width);
-            valN = length(imx);
-            for i=1:valN
-                pixrng = [floor(imx(i)), ceil(imx(i)), floor(imy(i)), ceil(imy(i))];
-                if pixrng(1) < 1 || pixrng(2) > intrin.width || ...
-                        pixrng(3) < 1 || pixrng(4) > intrin.height
-                    continue
-                end
-
-                curdep = points(i,3);
-                rwnd = pixrng(3):pixrng(4);
-                cwnd = pixrng(1):pixrng(2);
-                pixw = obj.distributeWeight([imx(i), imy(i)], pixrng);
-                weight(rwnd, cwnd) = weight(rwnd, cwnd) + pixw;
-                depthW(rwnd, cwnd) = depthW(rwnd, cwnd) + pixw * curdep;
-            end
-
-            nzInds = find(weight > 0.001);
-            depthReg(nzInds) = depthW(nzInds) ./ weight(nzInds);
-        end
-
-        function pixw = distributeWeight(obj, pixel, pixrng)
-            if pixrng(1)==pixrng(2)
-                xw = 0.5;
-            else
-                xw = [abs(pixrng(2) - pixel(1)), abs(pixrng(1) - pixel(1))];
-            end
-            if pixrng(3)==pixrng(4)
-                yw = 0.5;
-            else
-                yw = [abs(pixrng(4) - pixel(2)); abs(pixrng(3) - pixel(2))];
-            end
-
-            xw = repmat(xw, size(yw,1), 1);
-            yw = repmat(yw, 1, size(xw,2));
-            pixw = xw .* yw;
         end
     end
 
