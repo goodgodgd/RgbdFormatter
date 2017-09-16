@@ -15,6 +15,7 @@ function rgbdFormatter(dataStyle, sourcePath, targetPath, sceneDirPattern)
 
 if strcmpi(dataStyle, 'ScanNet')
     scanReformer = ReformatScanNet();
+    preRegistered = false;
     scanReformer.reformatDataset(sourcePath, sceneDirPattern, targetPath)
 elseif strcmpi(dataStyle, 'TUM')
     tumReformer = ReformatTum();
