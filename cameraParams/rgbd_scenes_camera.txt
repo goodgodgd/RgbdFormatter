@@ -4,5 +4,5 @@ fx = 570.3
 fy = 570.3
 cx = 320
 cy = 240
-depthMeterScale = 1000
+depthMeterScale = 10000
 

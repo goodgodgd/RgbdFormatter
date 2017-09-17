@@ -71,7 +71,7 @@ classdef ReformatUnregistered < Reformatter
             itg = obj.itgintr;
             params = [rgb.width rgb.height rgb.fx rgb.fy rgb.cx rgb.cy; ...
                 dep.width dep.height dep.fx dep.fy dep.cx dep.cy; ...
-                itg.width itg.height itg.fx itg.fy itg.cx itg.cy]
+                itg.width itg.height itg.fx itg.fy itg.cx itg.cy];
             imgsizes = params(:,1:2)
             intrinsics = params(:,3:end)
             

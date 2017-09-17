@@ -58,9 +58,9 @@ classdef ReformatRgbdScenes < Reformatter
             [pathstr, ~, ~] = fileparts(pathstr);
             filename = fullfile(pathstr, 'pc', sprintf('%s.pose', strrep(sceneDir, 'scene_', '')));
             poses = load(filename);
+            poses = [poses(:,5:7) poses(:,1:4)];
         end
 
     end
     
 end
-

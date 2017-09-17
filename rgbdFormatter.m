@@ -1,4 +1,4 @@
-function rgbdFormatter(dataStyle, sourcePath, targetPath, sceneDirPattern)
+function rgbdFormatter(dataStyle, sourcePath, targetPath, sceneDirPattern, imgCopy)
 % dataSytle: data format of dataset, it can be one of
 %             'ScanNet', 'TUM', and 'rgbd-scenes'
 % sourcePath: source data path, it can include multiple scenes
@@ -13,13 +13,17 @@ function rgbdFormatter(dataStyle, sourcePath, targetPath, sceneDirPattern)
 % in a text file in git_root/cameraParams.
 % Please refer the format of other files in that folder.
 
+if nargin < 5
+    imgCopy = true;
+end
+
 if strcmpi(dataStyle, 'ScanNet')
     scanReformer = ReformatScanNet();
-    scanReformer.reformatDataset(sourcePath, sceneDirPattern, targetPath)
+    scanReformer.reformatDataset(sourcePath, sceneDirPattern, targetPath, imgCopy)
 elseif strcmpi(dataStyle, 'TUM')
     tumReformer = ReformatTum();
-    tumReformer.reformatDataset(sourcePath, sceneDirPattern, targetPath)
+    tumReformer.reformatDataset(sourcePath, sceneDirPattern, targetPath, imgCopy)
 elseif strcmpi(dataStyle, 'rgbd-scenes')
     tumReformer = ReformatRgbdScenes();
-    tumReformer.reformatDataset(sourcePath, sceneDirPattern, targetPath)
+    tumReformer.reformatDataset(sourcePath, sceneDirPattern, targetPath, imgCopy)
 end

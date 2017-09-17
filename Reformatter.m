@@ -7,7 +7,11 @@ classdef Reformatter < handle
     end
 
     methods
-        function reformatDataset(obj, sourcePath, sceneDirPattern, targetPath)
+        function reformatDataset(obj, sourcePath, sceneDirPattern, targetPath, imgCopy)
+            if nargin < 5
+                imgCopy = true;
+            end
+            
             % find sub paths under sourcePath that includes image frames
             subPathList = obj.findSourceDirList(sourcePath, sceneDirPattern)
             listLen = length(subPathList);
@@ -16,7 +20,7 @@ classdef Reformatter < handle
                 rawScenePath = char(subPathList(i));
                 dstPath = char(strrep(rawScenePath, sourcePath, targetPath));
                 % create subdirs and files
-                obj.preparePath(dstPath);
+                obj.preparePath(dstPath, imgCopy);
                 
                 % the order of following functions MATTERS. Do NOT change it.
                 % copy text file containing camera parameters
@@ -24,8 +28,10 @@ classdef Reformatter < handle
                 % convert rgb, depth, and pose into unified format
                 % and copy them into dstPath
                 [depthFiles, rgbFiles, poses] = obj.getSyncronizedFrames(rawScenePath);
-                obj.moveImages(depthFiles, 'depth', dstPath)
-                obj.moveImages(rgbFiles, 'rgb', dstPath)
+                if imgCopy
+                    obj.moveImages(depthFiles, 'depth', dstPath)
+                    obj.moveImages(rgbFiles, 'rgb', dstPath)
+                end
                 obj.writePoses(poses, dstPath)
             end
         end
@@ -46,29 +52,24 @@ classdef Reformatter < handle
         end
 
 
-        function preparePath(obj, parentDir)
-            if exist(parentDir, 'dir')
-                parentDir
-                rmdir(parentDir, 's')
-            end
-            pause(0.1)
-            mkdir(parentDir);
-
-            if exist(fullfile(parentDir, 'rgb'), 'dir')
-                rmdir(fullfile(parentDir, 'rgb'), 's')
-            end
-            pause(0.1)
-            mkdir(parentDir, 'rgb')
-
-            if exist(fullfile(parentDir, 'depth'), 'dir')
-                rmdir(fullfile(parentDir, 'depth'), 's')
-            end
-            pause(0.1)
-            mkdir(parentDir, 'depth')
-
+        function preparePath(obj, parentDir, cleanDir)
+            obj.cleanAndMakeDirs(parentDir, cleanDir);
+            ['create ', parentDir]
+            obj.cleanAndMakeDirs(fullfile(parentDir, 'rgb'), cleanDir);
+            obj.cleanAndMakeDirs(fullfile(parentDir, 'depth'), cleanDir);
+            
             fid = fopen(fullfile(parentDir, 'poses.txt'), 'w');
-            pause(0.1)
             fclose(fid);
+        end
+        
+        function cleanAndMakeDirs(obj, dirname, cleanDir)
+            if exist(dirname, 'dir') && cleanDir
+                rmdir(dirname, 's')
+            end
+            pause(0.1)
+            if ~exist(dirname, 'dir')
+                mkdir(dirname);
+            end
         end
 
         function moveImages(obj, imgList, imgType, dstPath)

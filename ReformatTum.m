@@ -96,6 +96,9 @@ classdef ReformatTum < Reformatter
             fclose(fid);
 
             poses = poses(1:linecnt,:);
+            % TUM's pose format: [time x y z qx qy qz qw] 
+            % -> our format [time x y z qw qx qy qz]
+            poses = poses(:,[1 2 3 4 8 5 6 7]);
         end
 
     end % method
