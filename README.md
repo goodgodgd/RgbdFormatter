@@ -26,9 +26,11 @@ Directory structures are reorganized as follows.
 ![tree-compare](https://github.com/goodgodgd/RgbdFormatter/blob/master/imgs/tree-compare.png)
 </br>
 The unified format has three features.
+
 1. Index-based naming: rgb and depth images are simply named by frame indices.
 2. Camera tracjectoy on a single file: The pose on the i-th line in 'poses.txt' corresponds to the i-th rgb-depth images. Poses are formatted as (tx ty tz qw qx qy qz).
 3. Registered rgb-depth pixels : If rgb images have the different size from depth images, they are rescaled into the size of depth images. If rgb-depth images have different intrinsic parameters, depth pixels are registered to rgb pixels. Hence the intrinsic parameters in 'camera_param.txt' are shared in both rgb and depth images.
+
 </br>
 Consequently, users simply read frames by indices and need not to care correspondences between rgb and depth.
 
@@ -55,6 +57,6 @@ Once you implemented a new class, you can add it in **rgbdFormatter.m** with a n
 To handle pixel-level correspondences, make a new class that inherits **ReformatUnregistered** and implement two abstract methods like **ReformatScanNet**.
 
 - *[depthFiles, rgbFiles, poses] = getSyncronizedFrames(obj, scenePath)* </br>: returns lists of image files and poses in the (tx ty tz qw qx qy qz) format **whose indices are syncronized in time**. </br>
-*[rgbintr, depintr, T_dep2rgb] = readCameraParams(obj, scenePath, rgbintr, depintr)* </br>
+- *[rgbintr, depintr, T_dep2rgb] = readCameraParams(obj, scenePath, rgbintr, depintr)* </br>
 : returns intrinsic parameters of rgb and depth in the structure including cx, cy, fx, fy, width, and height. T_dep2rgb refers to the extrinsic transformation matrix from a depth sensor to a rgb sensor.
 
