@@ -7,6 +7,8 @@ function rgbdFormatter(dataStyle, sourcePath, targetPath, sceneDirPattern, imgCo
 % sceneDirPattern: Naming pattern of scene folders.
 %   Folder names of scenes must have specific pattern with respect to dataStyle.
 %   e.g - 'scene_*', 'rgbd_dataset_*'
+% imgCopy (optional): if false, image files are NOT copied, but 
+% dir structure, camera parameter file, and pose file will be created.
 %   
 % IMPORTANT: When you try to reformat new dataset, 
 % you have to prepare camera parameters 

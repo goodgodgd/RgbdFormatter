@@ -160,8 +160,5 @@ classdef Reformatter < handle
     methods (Abstract, Access = protected)
         cameraFile = getCameraFileName(obj, rawScenePath)
         [depthFiles, rgbFiles, poses] = getSyncronizedFrames(obj, scenePath)
-%         imgList = getDepthList(obj, srcPath)
-%         imgList = getRgbList(obj, srcPath)
-%         poses = readAllPoses(obj, srcPath)
     end
 end
