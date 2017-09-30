@@ -1,7 +1,7 @@
 # RgbdFormatter
 This repository holds matlab codes to convert various rgbd datasets into the easy-to-use unified format including dir structure and file naming </br>
 When we utilize existing RGB-D datasets, it is annoying that all the datasets have different formats. We had to implement a different reader class for each dataset. </br>
-In addition, some datasets are difficult to syncronize rgb-depth-pose data. For example, TUM-style datasets are named with precise timestamps, which is more difficult to be synchronized than frame index naming. As ScanNet provides a camera pose with transformation matrix in a distinct file, there are too many tiny text files. Poses can be written in a single file where each line represents a position and a quaternion. </br>
+In addition, some datasets are difficult to syncronize rgb-depth-pose data. For example, TUM-style datasets are named with precise timestamps, which is more difficult to be synchronized than frame index naming. On the other hand, as ScanNet provides a camera pose with transformation matrix in a distinct file, there are too many tiny text files. Poses can be written in a single file where each line represents a position and a quaternion. </br>
 This is why RgbdFormatter was made. It converts different datasets (hence with different formats) into the same format. </br>
 
 ### 1. Formattable Datasets
@@ -31,7 +31,6 @@ The unified format has three features.
 2. Camera tracjectoy on a single file: The pose on the i-th line in 'poses.txt' corresponds to the i-th rgb-depth images. Poses are formatted as (tx ty tz qw qx qy qz).
 3. Registered rgb-depth pixels : If rgb images have the different size from depth images, they are rescaled into the size of depth images. If rgb-depth images have different intrinsic parameters, depth pixels are registered to rgb pixels. Hence the intrinsic parameters in 'camera_param.txt' are shared in both rgb and depth images.
 
-</br>
 Consequently, users simply read frames by indices and need not to care correspondences between rgb and depth.
 
 
